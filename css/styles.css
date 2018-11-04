@@ -1,0 +1,48 @@
+div.main-form{
+	height:500px;
+	width:30%;
+	margin: 0px auto;
+}
+
+div.avatar,div.form-title{
+	width: 50%;
+	margin:30px auto;
+	
+}
+
+img.avatar-image {
+    width: 100%;
+    border-radius: 100px;
+}
+
+input[type=email],input[type=password]{
+	width: 100%;
+	height:30px;
+	text-align: center;	
+}
+
+button[type="submit"]{
+	width: 100%;
+	height: 30px;
+	border:none;
+	background: #24ad09;
+	margin: 10px auto;
+	cursor: pointer;
+}
+
+button[type="submit"]:hover{
+	opacity: 0.8;
+}
+
+@keyframes animate{
+	from{transform:scale(0);};
+	to{transform:scale(1);}
+}
+
+form div.form-container{
+	margin: 40px;
+}
+
+.form-title h1,p{
+	text-align: center;
+}

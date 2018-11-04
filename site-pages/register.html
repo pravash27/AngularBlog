@@ -1,0 +1,20 @@
+<div class="main-form">
+	<form ng-submit="register()" name="registerForm">
+		<div class="form-title">
+			<h1>Register</h1>
+			<p>Fill the form to Create Account</p>
+		</div>
+		<div class="form-container">
+			<label for=""></label>
+			<input type="email" name="email" placeholder="Email" ng-model="register.email" id="email" autocomplete="off" required>
+			<span ng-show="!registerForm.email.$pristine && registerForm.email.$invalid">Invalid Email</span>
+			<label for=""></label>
+			<input type="password" name="password" placeholder="Password" ng-model="register.password" ng-minlength="5" id="password" required>
+			<span ng-show="!registerForm.password.$pristine && registerForm.password.$invalid">Invalid Password</span>
+			<label for=""></label>
+			<input type="password" name="confPassword" placeholder="Confirm Password" ng-minlength="5"  ng-model="register.confPassword" id="confpassword" required>
+			<span ng-show="!registerForm.confPassword.$pristine && register.password!=register.confPassword">Passwords Not Matched</span>
+			<button type="submit">Submit</button>
+		</div>
+	</form>
+</div>

@@ -1,0 +1,16 @@
+<div class="main-form">
+	<form ng-submit="login()" name="loginForm">
+		<div class="avatar">
+			<img class="avatar-image" src="images/img_avatar.png">
+		</div>
+		<div class="form-container">
+			<label for=""></label>
+			<input type="email" name="email" placeholder="Email" ng-model="login.email" autocomplete="off" id="email">
+			<span ng-show="validEmail">Invalid Email</span>
+			<label for=""></label>
+			<input type="password" name="password" placeholder="Password" ng-model="login.password" id="password">
+			<span ng-show="validPassword">Invalid Password</span>
+			<button type="submit">Submit</button>
+		</div>
+	</form>
+</div>
