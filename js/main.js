@@ -35,11 +35,20 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
             $rootScope.authData = {userData:{}};
       };
       $rootScope.getCurrentUser = function(){
-          return $rootScope.authData.userData.email;
+        try{
+            return $rootScope.authData.userData.email;
+        }catch(error){
+           return "";
+        }
       };
-      if($location.path() !== '/login' && !$rootScope.authData.userData.userLogin){
+      try{
+        if($location.path() !== '/login' && !$rootScope.authData.userData.userLogin){
           $location.path('/login')
+        }
+      }catch(error){
+        $location.path('/home')
       }
+      
 }])
 
 
