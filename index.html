@@ -21,20 +21,27 @@
         		<a class="nav-link" href="about">About</a>
       		</li>
     	</ul>
-    	<ul class="navbar-nav navbar-right">
+    	<ul class="navbar-nav navbar-right" id="before-login" >
     		<li class="nav-item">
         		<a class="nav-link" href="login">Login</a>
       		</li>
       		<li class="nav-item">
         		<a class="nav-link" href="register">Register</a>
       		</li>
-    	</ul>
+      </ul>
+      <ul class="navbar-nav navbar-right" id="after-login">
+          <li class="nav-item">
+              <a class="nav-link"  ng-click="logout()"  href="#">Logout</a>
+            </li>
+        </ul>
   </div>
 </nav>
 	<div ng-view></div>
 </body>
 <script type="text/javascript" src="vendor/angular/js/angular.min.js"></script>
 <script type="text/javascript" src="vendor/angular/js/angular-route.min.js"></script>
+<script type="text/javascript" src="vendor/angular/js/angular-cookies.min.js"></script>
+<script src="vendor/angular/js/angular-localstorage.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/5.5.7/firebase.js"></script>
 <script src="https://www.gstatic.com/firebasejs/5.5.7/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/5.5.7/firebase-auth.js"></script>
@@ -55,77 +62,6 @@
 </script>
 <script type="text/javascript" src="vendor/jquery/jquery.min.js"></script>
 <script type="text/javascript" src="vendor/bootstrap/js/bootstrap.min.js"></script>
-<script>
-angular.element(document.getElementsByTagName('head')).append(angular.element('<base href="' + window.location.pathname + '" />'));
-</script>
 
-<script>
-	var app = angular.module('blogApp',['ngRoute']);
-	app.config(['$routeProvider','$locationProvider',function($routeProvider,$locationProvider){
-		$routeProvider.when('/home',{
-			templateUrl:'site-pages/home.html'
-		}).when('/about',{
-			templateUrl:'site-pages/about.html'
-		}).when('/login',{
-			templateUrl:'site-pages/login.html',
-      controller:'loginController'
-		}).when('/register',{
-      templateUrl:'site-pages/register.html',
-      controller:'registerController'
-    }).otherwise({
-			redirectTo: '/login'
-		});
-		$locationProvider.html5Mode(true);
-	}]);
-
-  app.run(['$rootScope',function($rootScope){
-      $rootScope.fireObject = firebase;
-  }])
-
-	app.controller('blogController',['$rootScope','$scope',function($rootScope,$scope){
-	}]);
-
-  app.controller('loginController',['$rootScope','$scope','$window',function($rootScope,$scope,$window){
-    $scope.validEmail = false;
-    $scope.validPassword = false;
-    $scope.login = function(){
-      $rootScope.fireObject.auth().signInWithEmailAndPassword($scope.login.email,$scope.login.password).then(function(user){
-          alert('successfully login');
-          $window.location.href = '/home';
-      }).catch(function(error){
-          switch(error.code){
-            case "auth/auth/invalid-email": alert("Email is not Valid");break;
-            case "auth/user-disabled": alert("Account is already closed");break;
-            case "auth/user-not-found": alert("Invalid User");break;
-            case "auth/wrong-password": alert("Wrong Password")break;
-            default: alert(error.message);
-          } 
-      });
-    }
-  }])
-
-  app.controller('registerController',['$rootScope','$scope','$window',function($rootScope,$scope,$window){
-    $scope.register = function(){
-      console.dir($scope.registerForm.email.$valid && $scope.registerForm.password.$valid && ($scope.register.password==$scope.register.confPassword));
-      if($scope.registerForm.email.$valid && $scope.registerForm.password.$valid && ($scope.register.password==$scope.register.confPassword)){
-          $rootScope.fireObject.auth().createUserWithEmailAndPassword($scope.register.email,$scope.register.password)
-            .then(function(user){
-                $window.location.path('/login')
-            })
-            .catch(function(error){
-              switch(error.code){
-                case "auth/email-already-in-use": alert("Email is already taken");break;
-                case "auth/invalid-email": alert("Email is not Valid");break;
-                case "auth/operation-not-allowed": alert("Account not Enabled");break;
-                case "auth/email-already-in-use": alert("Email is already taken");break;
-                default: alert(error.message);
-              }
-          });
-        }else{
-          alert("Invalid Data");
-        }
-      
-    }
-  }]);
-</script>
+<script  type="text/javascript" src="js/main.js"></script>
 </html>
