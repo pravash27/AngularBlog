@@ -94,8 +94,6 @@ app.controller('loginController',['$rootScope','$scope','initContents','$cookies
                 uid:user.user.uid
               }
             };
-
-         $cookies.put('demo',"dsfsdfsd");
          sessionStorage.setItem('authData',JSON.stringify($scope.authData));
           $location.path('/home');
          
@@ -112,7 +110,7 @@ app.controller('loginController',['$rootScope','$scope','initContents','$cookies
   }])
 
 //Main registration Controller
-app.controller('registerController',['$rootScope','$scope','$window',function($rootScope,$scope,$window){
+app.controller('registerController',['$rootScope','$scope','$window','$location',function($rootScope,$scope,$window,$location){
     $scope.register = function(){
       
       if($scope.registerForm.email.$valid && $scope.registerForm.password.$valid && ($scope.register.password==$scope.register.confPassword)){
@@ -120,26 +118,20 @@ app.controller('registerController',['$rootScope','$scope','$window',function($r
             .then(function(user){
               var file = document.getElementById('file').files[0];
               const uid = user.user.uid;
-              var actFilePath = "";
               if(file)
               {
                   filePath = 'user/'+uid+"/"+file.name;
-                  $rootScope.fireObject.storage().ref(filePath).put(file).then(function(fileSnapshot){
-                    return fileSnapshot.ref.getDownloadURL().then((url)=>{
-                      $rootScope.fireObject.database().ref('users/'+uid).set({
-                        filePath:url
-                      });
-                    });
-                 }).catch(function(error){
+                  $rootScope.fireObject.storage().ref(filePath).put(file).catch(function(error){
                   alert(error.mesaage);
                 });
-                console.dir(actFilePath);
               }
               $rootScope.fireObject.database().ref('users/'+uid).set({
                 username:$scope.register.username,
                 dob: Date($scope.register.dob),
+                filename:file.name
               });
-              $window.location.href='/login';
+              alert("You've registered Successfully")
+              $window.location.href="/login";
             })
             .catch(function(error){
               switch(error.code){
