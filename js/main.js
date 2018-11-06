@@ -44,9 +44,11 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
       try{
         if($location.path() !== '/login' && !$rootScope.authData.userData.userLogin){
           $location.path('/login')
+        }else{
+          $location.path('/home');
         }
       }catch(error){
-        $location.path('/home')
+        $location.path('/login')
       }
       
 }])
@@ -54,7 +56,7 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
 
 
 app.factory('initContents',['$rootScope',function($rootScope){
-    var data = {};
+    var data = {}; 
     data.initNavContents = function(){
         if($rootScope.getCurrentUser()){
             document.querySelector('#before-login').style.display="none";
@@ -69,7 +71,7 @@ app.factory('initContents',['$rootScope',function($rootScope){
 
 
 //Main Blog controller
-app.controller('blogController',['$rootScope','$scope','initContents',function($rootScope,$scope,initContents){
+app.controller('blogController',['$rootScope','$scope','initContents','$cookies',function($rootScope,$scope,initContents,$cookies){
         initContents.initNavContents();
         $scope.logout = function(){
             
@@ -79,7 +81,7 @@ app.controller('blogController',['$rootScope','$scope','initContents',function($
     }]);
 
 //Main login Controller
-app.controller('loginController',['$rootScope','$scope','$window','$cookies',function($rootScope,$scope,$window,$cookies){
+app.controller('loginController',['$rootScope','$scope','initContents','$cookies','$location',function($rootScope,$scope,initContents,$cookies,$location){
     $scope.validEmail = false;
     $scope.validPassword = false;
     $scope.login = function(){
@@ -93,10 +95,10 @@ app.controller('loginController',['$rootScope','$scope','$window','$cookies',fun
               }
             };
 
-         
+         $cookies.put('demo',"dsfsdfsd");
          sessionStorage.setItem('authData',JSON.stringify($scope.authData));
-          $window.location.href = '/home';
-          //initContents.initNavContents();
+          $location.path('/home');
+         
       }).catch(function(error){
           switch(error.code){
             case "auth/auth/invalid-email": alert("Email is not Valid");break;
@@ -112,11 +114,32 @@ app.controller('loginController',['$rootScope','$scope','$window','$cookies',fun
 //Main registration Controller
 app.controller('registerController',['$rootScope','$scope','$window',function($rootScope,$scope,$window){
     $scope.register = function(){
-      console.dir($scope.registerForm.email.$valid && $scope.registerForm.password.$valid && ($scope.register.password==$scope.register.confPassword));
+      
       if($scope.registerForm.email.$valid && $scope.registerForm.password.$valid && ($scope.register.password==$scope.register.confPassword)){
           $rootScope.fireObject.auth().createUserWithEmailAndPassword($scope.register.email,$scope.register.password)
             .then(function(user){
-                $window.location.path('/login')
+              var file = document.getElementById('file').files[0];
+              const uid = user.user.uid;
+              var actFilePath = "";
+              if(file)
+              {
+                  filePath = 'user/'+uid+"/"+file.name;
+                  $rootScope.fireObject.storage().ref(filePath).put(file).then(function(fileSnapshot){
+                    return fileSnapshot.ref.getDownloadURL().then((url)=>{
+                      $rootScope.fireObject.database().ref('users/'+uid).set({
+                        filePath:url
+                      });
+                    });
+                 }).catch(function(error){
+                  alert(error.mesaage);
+                });
+                console.dir(actFilePath);
+              }
+              $rootScope.fireObject.database().ref('users/'+uid).set({
+                username:$scope.register.username,
+                dob: Date($scope.register.dob),
+              });
+              $window.location.href='/login';
             })
             .catch(function(error){
               switch(error.code){

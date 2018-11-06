@@ -19,6 +19,19 @@ input[type=email],input[type=password]{
 	width: 100%;
 	height:30px;
 	text-align: center;	
+	
+}
+
+input[type=text],input[type=date],input[type=file]{
+	width: 100%;
+	height:30px;
+	text-align: center;	
+	color: #919aa1;
+}
+input[type=file]{
+	width: 100%;
+	height:30px;
+	border:1px solid #919aa1;
 }
 
 button[type="submit"]{

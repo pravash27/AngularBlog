@@ -6,8 +6,17 @@
 		</div>
 		<div class="form-container">
 			<label for=""></label>
+			<input type="text" name="username" placeholder="Username" ng-model="register.username" id="username" autocomplete="off" required>
+			<span ng-show="!registerForm.username.$pristine && registerForm.username.$invalid">Invalid Username</span>
+			<label for=""></label>
+			<input type="date" name="dob" placeholder="Date of Birth" ng-model="register.dob" id="dob" autocomplete="off" required>
+			<span ng-show="!registerForm.dob.$pristine && registerForm.dob.$invalid">Invalid Email</span>
+			<label for=""></label>
 			<input type="email" name="email" placeholder="Email" ng-model="register.email" id="email" autocomplete="off" required>
 			<span ng-show="!registerForm.email.$pristine && registerForm.email.$invalid">Invalid Email</span>
+			<label for=""></label>
+			<input type="file" name="file" placeholder="File" file-model="register.file" id="file" autocomplete="off">
+			<span ng-show="!registerForm.file.$pristine && registerForm.file.$invalid">Invalid File</span>
 			<label for=""></label>
 			<input type="password" name="password" placeholder="Password" ng-model="register.password" ng-minlength="5" id="password" required>
 			<span ng-show="!registerForm.password.$pristine && registerForm.password.$invalid">Invalid Password</span>
