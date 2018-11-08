@@ -28,28 +28,25 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
 //Firebase obj initialize in angular
  app.run(['$rootScope','$cookies','$location',function($rootScope,$cookies,$location){
       $rootScope.fireObject = firebase;
+      $rootScope.isLogin = false;
       try{
-        $rootScope.authData = JSON.parse(sessionStorage.getItem('authData'))
+        $rootScope.authData = JSON.parse(sessionStorage.getItem('authData'));
+        $rootScope.isLogin = $rootScope.authData.userData.userLogin;
       }
       catch(error){
             $rootScope.authData = {userData:{}};
+            $rootScope.isLogin = false;
       };
       $rootScope.getCurrentUser = function(){
         try{
             return $rootScope.authData.userData.email;
         }catch(error){
-           return "";
+           return null;
         }
       };
-      try{
-        if($location.path() !== '/login' && !$rootScope.authData.userData.userLogin){
+        if($location.path() !== '/login' && !$rootScope.isLogin){
           $location.path('/login')
-        }else{
-          $location.path('/home');
         }
-      }catch(error){
-        $location.path('/login')
-      }
       
 }])
 
