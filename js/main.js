@@ -16,6 +16,12 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
 		}).when('/register',{
       templateUrl:'site-pages/register.html',
       controller:'registerController'
+    }).when('/chngpassword',{
+      templateUrl:'site-pages/chngpassword.html',
+      controller:'passwordController'
+    }).when('/forgotpass',{
+      templateUrl:'site-pages/forgotpassword.html',
+      controller:'forgotpasswordController'
     }).otherwise({
 			redirectTo: '/login'
 		});
@@ -27,7 +33,16 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
 
 //Firebase obj initialize in angular
  app.run(['$rootScope','$cookies','$location',function($rootScope,$cookies,$location){
-      $rootScope.fireObject = firebase;
+     var config = {
+        apiKey: "AIzaSyBIAe5imPmiS0dyS-NbO-5HwwlDolvc0SQ",
+        authDomain: "agularapp-4c104.firebaseapp.com",
+        databaseURL: "https://agularapp-4c104.firebaseio.com",
+        projectId: "agularapp-4c104",
+        storageBucket: "agularapp-4c104.appspot.com",
+        messagingSenderId: "1072599141541"
+      };
+    firebase.initializeApp(config); 
+    $rootScope.fireObject = firebase;
       $rootScope.isLogin = false;
       try{
         $rootScope.authData = JSON.parse(sessionStorage.getItem('authData'));
@@ -45,7 +60,7 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
         }
       };
         if($location.path() !== '/login' && !$rootScope.isLogin){
-          $location.path('/login')
+          $location.path('/login');
         }
       
 }])
@@ -71,77 +86,10 @@ app.factory('initContents',['$rootScope',function($rootScope){
 app.controller('blogController',['$rootScope','$scope','initContents','$cookies',function($rootScope,$scope,initContents,$cookies){
         initContents.initNavContents();
         $scope.logout = function(){
-            
+          firebase.auth().signOut().then(function() {
             sessionStorage.clear();
             window.location.href='/login';
-        } 
-    }]);
-
-//Main login Controller
-app.controller('loginController',['$rootScope','$scope','initContents','$cookies','$location',function($rootScope,$scope,initContents,$cookies,$location){
-    $scope.validEmail = false;
-    $scope.validPassword = false;
-    $scope.login = function(){
-      $rootScope.fireObject.auth().signInWithEmailAndPassword($scope.login.email,$scope.login.password).then(function(user){
-          alert('successfully login');
-          $rootScope.authData = {
-                userData:{
-                userLogin:true,
-                email:user.user.email,
-                uid:user.user.uid
-              }
-            };
-         sessionStorage.setItem('authData',JSON.stringify($scope.authData));
-          $location.path('/home');
-         
-      }).catch(function(error){
-          switch(error.code){
-            case "auth/auth/invalid-email": alert("Email is not Valid");break;
-            case "auth/user-disabled": alert("Account is already closed");break;
-            case "auth/user-not-found": alert("Invalid User");break;
-            case "auth/wrong-password": alert("Wrong Password");break;
-            default: alert(error.message);
-          } 
-      });
-    }
-  }])
-
-//Main registration Controller
-app.controller('registerController',['$rootScope','$scope','$window','$location',function($rootScope,$scope,$window,$location){
-    $scope.register = function(){
-      
-      if($scope.registerForm.email.$valid && $scope.registerForm.password.$valid && ($scope.register.password==$scope.register.confPassword)){
-          $rootScope.fireObject.auth().createUserWithEmailAndPassword($scope.register.email,$scope.register.password)
-            .then(function(user){
-              var file = document.getElementById('file').files[0];
-              const uid = user.user.uid;
-              if(file)
-              {
-                  filePath = 'user/'+uid+"/"+file.name;
-                  $rootScope.fireObject.storage().ref(filePath).put(file).catch(function(error){
-                  alert(error.mesaage);
-                });
-              }
-              $rootScope.fireObject.database().ref('users/'+uid).set({
-                username:$scope.register.username,
-                dob: Date($scope.register.dob),
-                filename:file.name
-              });
-              alert("You've registered Successfully")
-              $window.location.href="/login";
-            })
-            .catch(function(error){
-              switch(error.code){
-                case "auth/email-already-in-use": alert("Email is already taken");break;
-                case "auth/invalid-email": alert("Email is not Valid");break;
-                case "auth/operation-not-allowed": alert("Account not Enabled");break;
-                case "auth/email-already-in-use": alert("Email is already taken");break;
-                default: alert(error.message);
-              }
+          }).catch(function(error) {
           });
-        }else{
-          alert("Invalid Data");
-        }
-      
-    }
-  }]);
+        } 
+ }]);

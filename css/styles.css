@@ -59,3 +59,8 @@ form div.form-container{
 .form-title h1,p{
 	text-align: center;
 }
+
+.dropdown-menu.show {
+    width: fit-content;
+    margin: auto -30px;
+}
