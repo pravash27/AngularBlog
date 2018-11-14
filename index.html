@@ -1,17 +1,21 @@
 <!DOCTYPE html >
-<html ng-app="blogApp" ng-controller="blogController">
+<html ng-app="blogApp" ng-controller="blogController" ng-init="init()">
 <head>
 	<title>AngularBlog</title>
 	<link rel="stylesheet" type="text/css" href="css/styles.css">
 	<link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+	<script>
+	</script>
 </head>
 <body>
+		<div class="preloader">
+				<div class="circleLoader"></div>
+		</div>
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   		<a class="navbar-brand" href="home">BlogApp</a>
   		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
     		<span class="navbar-toggler-icon"></span>
   		</button>
-
   	<div class="collapse navbar-collapse" id="navbarColor02">
     	<ul class="navbar-nav mr-auto">
       		<li class="nav-item active">

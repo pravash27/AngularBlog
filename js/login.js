@@ -1,21 +1,16 @@
 //Main login Controller
-app.controller('loginController',['$rootScope','$scope','initContents','$cookies','$window',function($rootScope,$scope,initContents,$cookies,$window){
+app.controller('loginController',['$rootScope','$scope','initContents','$cookies','$location',function($rootScope,$scope,initContents,$cookies,$location){
     $scope.validEmail = false;
     initContents.alert();
     $scope.validPassword = false;
     $scope.login = function(){
       $rootScope.fireObject.auth().signInWithEmailAndPassword($scope.login.email,$scope.login.password).then(function(user){
-          alert('successfully login');
-          $rootScope.authData = {
-                userData:{
-                userLogin:true,
-                email:user.user.email,
-                uid:user.user.uid
-              }
-            };
           sessionStorage.setItem('login',"Welcome to Angular Blog");
-          sessionStorage.setItem('authData',JSON.stringify($scope.authData));
-          $window.location.href = '/home';
+          document.querySelector('#before-login').style.display="none";
+          document.querySelector('#after-login').style.display="flex";
+          $rootScope.$apply(function() {
+            $location.path('/home');
+          });  
          
       }).catch(function(error){
           switch(error.code){

@@ -24,16 +24,22 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
       templateUrl:'site-pages/forgotpassword.html',
       controller:'forgotpasswordController'
     }).otherwise({
-			redirectTo: '/login'
+			redirectTo: '/home'
 		});
 		$locationProvider.html5Mode(true);
 	}]);
 
-
+app.factory('checkCredentials',function(){
+  return {
+    userSignedIn:function(){
+      return firebase.auth().currentUser;
+    }
+  }
+})
 
 
 //Firebase obj initialize in angular
- app.run(['$rootScope','$cookies','$location',function($rootScope,$cookies,$location){
+ app.run(['$rootScope','$cookies','$location','checkCredentials',function($rootScope,$cookies,$location,checkCredentials){
      var config = {
         apiKey: "AIzaSyBIAe5imPmiS0dyS-NbO-5HwwlDolvc0SQ",
         authDomain: "agularapp-4c104.firebaseapp.com",
@@ -44,41 +50,35 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
       };
     firebase.initializeApp(config);
     $rootScope.fireObject = firebase;
-      $rootScope.isLogin = false;
-      try{
-        $rootScope.authData = JSON.parse(sessionStorage.getItem('authData'));
-        $rootScope.isLogin = $rootScope.authData.userData.userLogin;
-      }
-      catch(error){
-            $rootScope.authData = {userData:{}};
-            $rootScope.isLogin = false;
-      };
-      $rootScope.getCurrentUser = function(){
-        try{
-            return $rootScope.authData.userData.email;
-        }catch(error){
-           return null;
-        }
-      };
-        if($location.path() !== '/login' && !$rootScope.isLogin){
-          $location.path('/login');
-        }
-      
 }]);
 
-app.factory('initContents',['$rootScope',function($rootScope){
+app.factory('initContents',['$rootScope','checkCredentials','$location',function($rootScope,checkCredentials,$location){
     var data = {}; 
-    data.initNavContents = function(){
-        if($rootScope.getCurrentUser()){
+    
+    data.checkLoginStatus = function(){
+      
+      window.setTimeout(function(){
+        if(!checkCredentials.userSignedIn()){
+          document.querySelector('#before-login').style.display="flex";
+            document.querySelector('#after-login').style.display="none";
+          $rootScope.$apply(function() {
+            $location.path('/login');
+          });  
+        }else{
             document.querySelector('#before-login').style.display="none";
             document.querySelector('#after-login').style.display="flex";
-        }else{
-            document.querySelector('#before-login').style.display="flex";
-            document.querySelector('#after-login').style.display="none";
+            if($location.path()=='/login' || $location.path()=='/register'){
+              $rootScope.$apply(function() {
+                $location.path("/home");
+              });
+            }
+                
         }
-    };
-
-
+        document.querySelector('.preloader').style.display="none";  
+      },3000);     
+    }
+    
+    
     data.alert = function(){
       var alertData="";
       var label = "";
@@ -106,18 +106,26 @@ app.factory('initContents',['$rootScope',function($rootScope){
 
 
 //Main Blog controller
-app.controller('blogController',['$rootScope','$scope','initContents','$cookies',function($rootScope,$scope,initContents,$cookies){
-        initContents.initNavContents();
-        $scope.logout = function(){
-          firebase.auth().signOut().then(function() {
-            sessionStorage.clear();
-            sessionStorage.setItem('logout',"Thanks!!!!!!")
-            window.location.href='/login';
-          }).catch(function(error) {
-          });
-        } 
+app.controller('blogController',['$rootScope','$scope','initContents','$cookies','checkCredentials','$location',function($rootScope,$scope,initContents,$cookies,checkCredentials,$location){
+  
+  $scope.logout = function(){
+      firebase.auth().signOut().then(function() {
+          sessionStorage.clear();
+          sessionStorage.setItem('logout',"Thanks!!!!!!")
+          //window.location.href='/login';
+          $rootScope.$apply(function(){
+            $location.path('/login');
+          })
+        }).catch(function(error){
+        
+        });
+    }
+    $scope.init = function(){
+      initContents.checkLoginStatus();
+    }
  }]);
 
- app.controller('homeController',['initContents',function(initContents){
+ app.controller('homeController',['$scope','initContents',function($scope,initContents){
   initContents.alert();
+ 
  }]);
