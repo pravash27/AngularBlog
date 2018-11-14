@@ -64,3 +64,8 @@ form div.form-container{
     width: fit-content;
     margin: auto -30px;
 }
+
+div.alert{
+	display:none;
+	text-align: center;
+}

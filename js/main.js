@@ -7,7 +7,8 @@ var app = angular.module('blogApp',['ngRoute','ngCookies']);
 //Router Config
 app.config(['$routeProvider','$locationProvider',function($routeProvider,$locationProvider){
     $routeProvider.when('/home',{
-			templateUrl:'site-pages/home.html'
+      templateUrl:'site-pages/home.html',
+      controller: "homeController"
 		}).when('/about',{
 			templateUrl:'site-pages/about.html'
 		}).when('/login',{
@@ -41,7 +42,7 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
         storageBucket: "agularapp-4c104.appspot.com",
         messagingSenderId: "1072599141541"
       };
-    firebase.initializeApp(config); 
+    firebase.initializeApp(config);
     $rootScope.fireObject = firebase;
       $rootScope.isLogin = false;
       try{
@@ -63,9 +64,7 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
           $location.path('/login');
         }
       
-}])
-
-
+}]);
 
 app.factory('initContents',['$rootScope',function($rootScope){
     var data = {}; 
@@ -77,6 +76,30 @@ app.factory('initContents',['$rootScope',function($rootScope){
             document.querySelector('#before-login').style.display="flex";
             document.querySelector('#after-login').style.display="none";
         }
+    };
+
+
+    data.alert = function(){
+      var alertData="";
+      var label = "";
+      var time = 4000;
+      if(sessionStorage['login']){
+        alertData = document.getElementById('login');
+        label = "login";
+      }else if(sessionStorage['logout']){
+        alertData = document.getElementById('logout');
+        label="logout";
+      }
+      if(alertData!="" && alertData!=undefined){
+        alertData.innerHTML = sessionStorage[label]
+        alertData.style.display = 'block';
+        setTimeout(function(){
+            alertData.style.display = "none";
+            sessionStorage.removeItem(label);
+        },time);
+      }
+      
+
     }
     return data;
 }]);
@@ -88,8 +111,13 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
         $scope.logout = function(){
           firebase.auth().signOut().then(function() {
             sessionStorage.clear();
+            sessionStorage.setItem('logout',"Thanks!!!!!!")
             window.location.href='/login';
           }).catch(function(error) {
           });
         } 
+ }]);
+
+ app.controller('homeController',['initContents',function(initContents){
+  initContents.alert();
  }]);
