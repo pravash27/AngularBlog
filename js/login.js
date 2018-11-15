@@ -5,6 +5,15 @@ app.controller('loginController',['$rootScope','$scope','initContents','$cookies
     $scope.validPassword = false;
     $scope.login = function(){
       $rootScope.fireObject.auth().signInWithEmailAndPassword($scope.login.email,$scope.login.password).then(function(user){
+        $rootScope.fireObject.database().ref('/users/'+user.user.uid).on('value',function(snapshot){
+          var userData = snapshot.val();
+          firebase.storage().ref('user/'+user.user.uid+'/'+userData.filename).getDownloadURL().then(function(url){
+            if(url){
+              document.getElementById('userImage').setAttribute('src',url);
+            }  
+        });
+        });
+                   
           sessionStorage.setItem('login',"Welcome to Angular Blog");
           document.querySelector('#before-login').style.display="none";
           document.querySelector('#after-login').style.display="flex";

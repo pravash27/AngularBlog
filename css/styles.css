@@ -94,3 +94,10 @@ div.alert{
 	0% {transform:rotate(0deg);}
 	100% {transform:rotate(360deg);}
 }
+
+#userImage{
+	height:50px;
+	width:50px;
+	margin:20px 50px;
+	border-radius: 50px;
+}

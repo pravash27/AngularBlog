@@ -14,10 +14,11 @@ app.controller('registerController',['$rootScope','$scope','$window','$location'
               if(file)
               {
                   filePath = 'user/'+uid+'/'+file.name;
-                  $rootScope.fireObject.storage().ref(filePath).put(file).catch(function(error){
+                  $rootScope.fireObject.storage().ref(filePath).put(file).then(function(){
+                      filename = file.name;
+                  }).catch(function(error){
                   alert(error.mesaage);
                 });
-                filename = file.name;
               }
               $rootScope.fireObject.database().ref('users/'+uid).set({
                 username:$scope.register.username,

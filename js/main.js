@@ -56,27 +56,39 @@ app.factory('initContents',['$rootScope','checkCredentials','$location',function
     var data = {}; 
     
     data.checkLoginStatus = function(){
-      
-      window.setTimeout(function(){
-        if(!checkCredentials.userSignedIn()){
+      var user =  checkCredentials.userSignedIn();
+      setTimeout(function(){
+        var userdata;
+        if(!user){
           document.querySelector('#before-login').style.display="flex";
-            document.querySelector('#after-login').style.display="none";
+          document.querySelector('#after-login').style.display="none";
           $rootScope.$apply(function() {
             $location.path('/login');
           });  
         }else{
             document.querySelector('#before-login').style.display="none";
             document.querySelector('#after-login').style.display="flex";
+            var uid = $rootScope.fireObject.auth().currentUser.uid;
+            document.querySelector('.preloader').style.display="none";
             if($location.path()=='/login' || $location.path()=='/register'){
               $rootScope.$apply(function() {
                 $location.path("/home");
               });
             }
-                
+            $rootScope.fireObject.database().ref('/users/'+uid).on('value',function(snapshot){
+              var userData = snapshot.val();
+              firebase.storage().ref('user/'+uid+'/'+userData.filename).getDownloadURL().then(function(url){
+                  if(url){
+                    document.getElementById('userImage').setAttribute('src',url);
+                  }  
+              });
+            },function(error){
+              console.dir(error);
+            });
         }
-        document.querySelector('.preloader').style.display="none";  
-      },3000);     
-    }
+      },3000);
+    
+   }
     
     
     data.alert = function(){
