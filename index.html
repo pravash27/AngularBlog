@@ -37,7 +37,7 @@
           <li class="nav-item dropdown">
 			  <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">{{username}}</a>
 			  <div class="dropdown-menu">
-					<img id="userImage">
+					<img id="userImage" ng-src="{{imageURL}}">
 					<a class="dropdown-item"  href="chngpassword">Change Password</a>
 					<a class="dropdown-item"  ng-click="logout()" >Logout</a>
 			  </div>

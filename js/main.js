@@ -33,6 +33,24 @@ app.factory('checkCredentials',function(){
   return {
     userSignedIn:function(){
       return firebase.auth().currentUser;
+    },
+    getUserData:function(uid){
+    		var promise = new Promise(function(resolve,reject){
+    			firebase.database().ref('/users/'+uid).on('value',function(snapshot){
+    				var snapshotData = {
+    					uid:uid,
+    					userData:snapshot.val()
+    				}
+    				resolve(snapshotData);
+	        	},function(error){
+	            console.dir(error);
+	        	});
+    		});
+    		return promise;
+    		
+    },
+    getUserImage:function(uid,filename){
+    		return firebase.storage().ref('user/'+uid+'/'+filename).getDownloadURL();
     }
   }
 })
@@ -56,39 +74,34 @@ app.factory('initContents',['$rootScope','checkCredentials','$location',function
     var data = {}; 
     
     data.checkLoginStatus = function(){
-      var user =  checkCredentials.userSignedIn();
-      setTimeout(function(){
-        var userdata;
-        if(!user){
-          document.querySelector('#before-login').style.display="flex";
-          document.querySelector('#after-login').style.display="none";
-          $rootScope.$apply(function() {
-            $location.path('/login');
-          });  
-        }else{
-            document.querySelector('#before-login').style.display="none";
-            document.querySelector('#after-login').style.display="flex";
-            var uid = $rootScope.fireObject.auth().currentUser.uid;
-            document.querySelector('.preloader').style.display="none";
-            if($location.path()=='/login' || $location.path()=='/register'){
-              $rootScope.$apply(function() {
-                $location.path("/home");
-              });
-            }
-            $rootScope.fireObject.database().ref('/users/'+uid).on('value',function(snapshot){
-              var userData = snapshot.val();
-              firebase.storage().ref('user/'+uid+'/'+userData.filename).getDownloadURL().then(function(url){
-                  if(url){
-                    document.getElementById('userImage').setAttribute('src',url);
-                  }  
-              });
-            },function(error){
-              console.dir(error);
-            });
-        }
-      },3000);
-    
-   }
+    	var promise = new Promise(function(resolve,reject){
+    		setTimeout(function(){
+        		if(!checkCredentials.userSignedIn()){
+			        document.querySelector('#before-login').style.display="flex";
+			        document.querySelector('#after-login').style.display="none";
+			        $rootScope.$apply(function() {
+			            $location.path('/login');
+			        }); 
+			        document.querySelector('.preloader').style.display="none";
+			        resolve();
+        		}else{
+        			console.dir("sdsda");
+		            document.querySelector('#before-login').style.display="none";
+		            document.querySelector('#after-login').style.display="flex";
+		            var uid = $rootScope.fireObject.auth().currentUser.uid;
+		            if($location.path()=='/login' || $location.path()=='/register'){
+		              $rootScope.$apply(function() {
+		                $location.path("/home");
+		              });
+            		}
+            		document.querySelector('.preloader').style.display="none";
+            		resolve(checkCredentials.getUserData(uid))
+            	}
+        		
+      			},3000);
+    	})
+      	return promise;
+   	}
     
     
     data.alert = function(){
@@ -119,12 +132,11 @@ app.factory('initContents',['$rootScope','checkCredentials','$location',function
 
 //Main Blog controller
 app.controller('blogController',['$rootScope','$scope','initContents','$cookies','checkCredentials','$location',function($rootScope,$scope,initContents,$cookies,checkCredentials,$location){
-  
+  $scope.username = "Anonymous";
   $scope.logout = function(){
       firebase.auth().signOut().then(function() {
           sessionStorage.clear();
           sessionStorage.setItem('logout',"Thanks!!!!!!")
-          //window.location.href='/login';
           $rootScope.$apply(function(){
             $location.path('/login');
           })
@@ -133,7 +145,21 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
         });
     }
     $scope.init = function(){
-      initContents.checkLoginStatus();
+      initContents.checkLoginStatus().then(function(data){
+      		if(data){
+      			$scope.$apply(function(){
+      			$scope.username = data.userData.username;
+      			console.dir($scope.username)
+      			checkCredentials.getUserImage(data.uid,data.userData.filename).then(function(url){
+      				//document.getElementById('userImage').setAttribute('src',url);
+      				$scope.$apply(function(){
+      				$scope.imageURL = url;
+      				console.dir(url);
+      				})
+      			})
+      		})
+      		}		
+      });
     }
  }]);
 
