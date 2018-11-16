@@ -1,5 +1,5 @@
 <!DOCTYPE html >
-<html ng-app="blogApp" ng-controller="blogController" ng-init="init()">
+<html ng-app="blogApp">
 <head>
 	<title>AngularBlog</title>
 	<link rel="stylesheet" type="text/css" href="css/styles.css">
@@ -9,7 +9,10 @@
 </head>
 <body>
 		<div class="preloader">
-				<div class="circleLoader"></div>
+				<div class="loader-data">
+						<h3>Authenticating Please Wait...... </h3>
+				</div>
+		<div class="circleLoader"></div>
 		</div>
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   		<a class="navbar-brand" href="home">BlogApp</a>
@@ -25,7 +28,7 @@
         		<a class="nav-link" href="about">About</a>
       		</li>
     	</ul>
-    	<ul class="navbar-nav navbar-right" id="before-login" >
+    	<ul class="navbar-nav navbar-right" id="before-login" ng-show="!isLogin">
     		<li class="nav-item">
         		<a class="nav-link" href="login">Login</a>
       		</li>
@@ -33,7 +36,7 @@
         		<a class="nav-link" href="register">Register</a>
       		</li>
       </ul>
-      <ul class="navbar-nav navbar-right" id="after-login">
+      <ul class="navbar-nav navbar-right" id="after-login" ng-show="isLogin">
           <li class="nav-item dropdown">
 			  <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">{{username}}</a>
 			  <div class="dropdown-menu">
@@ -54,7 +57,10 @@
 	<button type="button" class="close" data-dismiss="alert">&times;</button>
 	<p class="mb-0"></p>
   </div>
-	<div ng-view></div>
+	<div ng-controller="blogController" ng-init="init()">
+		<div ng-view></div>
+	</div>
+	
 </body>
 <script type="text/javascript" src="vendor/angular/js/angular.min.js"></script>
 <script type="text/javascript" src="vendor/angular/js/angular-route.min.js"></script>

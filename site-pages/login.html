@@ -1,4 +1,7 @@
 <div class="main-form">
+	<div class="submit-loader" ng-show="showLoader">
+		<div class="loader1"></div>
+	</div>
 	<form ng-submit="login()" name="loginForm">
 		<div class="form-title">
 			<h1>Login</h1>
@@ -9,12 +12,12 @@
 		</div>
 		<div class="form-container">
 			<label for=""></label>
-			<input type="email" name="email" placeholder="Email" ng-model="login.email" autocomplete="off" id="email">
+			<input type="email" name="email" placeholder="Email" ng-model="login.email" autocomplete="off" id="email" required>
 			<span ng-show="validEmail">Invalid Email</span>
 			<label for=""></label>
-			<input type="password" name="password" placeholder="Password" ng-model="login.password" id="password">
+			<input type="password" name="password" placeholder="Password" ng-model="login.password" id="password" required>
 			<span ng-show="validPassword">Invalid Password</span>
-			<button type="submit">Submit</button>
+			<button  type="submit">Submit</button>
 			<a class="nav-link" href="forgotpass">Forgot Your Password?</a>
 		</div>
 	</form>

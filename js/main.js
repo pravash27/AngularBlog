@@ -51,13 +51,29 @@ app.factory('checkCredentials',function(){
     },
     getUserImage:function(uid,filename){
     		return firebase.storage().ref('user/'+uid+'/'+filename).getDownloadURL();
-    }
+    },
+    login:function(email,password){
+      var promise = new Promise(function(resolve,reject){
+        firebase.auth().signInWithEmailAndPassword(email,password).then(function(user){
+          firebase.database().ref('/users/'+user.user.uid).on('value',function(snapshot){
+            var data = {
+              uid:user.user.uid,
+              userData:snapshot.val()
+            }
+            resolve(data);
+          });
+      }).catch(function(error){
+        reject(error);
+      })
+      
+    });
+    return promise;
   }
-})
-
+}
+});
 
 //Firebase obj initialize in angular
- app.run(['$rootScope','$cookies','$location','checkCredentials',function($rootScope,$cookies,$location,checkCredentials){
+app.run(['$rootScope','$cookies','$location','checkCredentials',function($rootScope,$cookies,$location,checkCredentials){
      var config = {
         apiKey: "AIzaSyBIAe5imPmiS0dyS-NbO-5HwwlDolvc0SQ",
         authDomain: "agularapp-4c104.firebaseapp.com",
@@ -77,24 +93,17 @@ app.factory('initContents',['$rootScope','checkCredentials','$location',function
     	var promise = new Promise(function(resolve,reject){
     		setTimeout(function(){
         		if(!checkCredentials.userSignedIn()){
-			        document.querySelector('#before-login').style.display="flex";
-			        document.querySelector('#after-login').style.display="none";
 			        $rootScope.$apply(function() {
 			            $location.path('/login');
 			        }); 
-			        document.querySelector('.preloader').style.display="none";
 			        resolve();
         		}else{
-        			console.dir("sdsda");
-		            document.querySelector('#before-login').style.display="none";
-		            document.querySelector('#after-login').style.display="flex";
 		            var uid = $rootScope.fireObject.auth().currentUser.uid;
 		            if($location.path()=='/login' || $location.path()=='/register'){
 		              $rootScope.$apply(function() {
 		                $location.path("/home");
 		              });
             		}
-            		document.querySelector('.preloader').style.display="none";
             		resolve(checkCredentials.getUserData(uid))
             	}
         		
@@ -107,7 +116,7 @@ app.factory('initContents',['$rootScope','checkCredentials','$location',function
     data.alert = function(){
       var alertData="";
       var label = "";
-      var time = 4000;
+      var time = 3000;
       if(sessionStorage['login']){
         alertData = document.getElementById('login');
         label = "login";
@@ -132,11 +141,14 @@ app.factory('initContents',['$rootScope','checkCredentials','$location',function
 
 //Main Blog controller
 app.controller('blogController',['$rootScope','$scope','initContents','$cookies','checkCredentials','$location',function($rootScope,$scope,initContents,$cookies,checkCredentials,$location){
-  $scope.username = "Anonymous";
-  $scope.logout = function(){
+  $rootScope.username = "Anonymous";
+  $rootScope.imageURL = "images/img_avatar.png"
+  $rootScope.isLogin = false;
+  $rootScope.logout = function(){
       firebase.auth().signOut().then(function() {
           sessionStorage.clear();
-          sessionStorage.setItem('logout',"Thanks!!!!!!")
+          sessionStorage.setItem('logout',"Thanks!!!!!!");
+          $rootScope.isLogin = false;
           $rootScope.$apply(function(){
             $location.path('/login');
           })
@@ -146,14 +158,14 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
     }
     $scope.init = function(){
       initContents.checkLoginStatus().then(function(data){
+          document.querySelector('.preloader').style.display="none";
       		if(data){
+            $rootScope.isLogin = true; 
       			$scope.$apply(function(){
-      			$scope.username = data.userData.username;
+      			$rootScope.username = data.userData.username;
       			checkCredentials.getUserImage(data.uid,data.userData.filename).then(function(url){
-      				//document.getElementById('userImage').setAttribute('src',url);
       				$scope.$apply(function(){
-      				$scope.imageURL = url;
-      				console.dir(url);
+      				$rootScope.imageURL = url;
       				})
       			})
       		})
@@ -162,7 +174,7 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
     }
  }]);
 
- app.controller('homeController',['$scope','initContents',function($scope,initContents){
+app.controller('homeController',['$scope','initContents',function($scope,initContents){
   initContents.alert();
  
  }]);
