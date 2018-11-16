@@ -133,7 +133,7 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
         });
     }
     $scope.init = function(){
-      initContents.checkLoginStatus();
+      initContents.checkLoginStatus($scope);
     }
  }]);
 
