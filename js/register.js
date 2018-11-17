@@ -1,46 +1,55 @@
 //Main registration Controller
 
+app.directive('ngFileContent',function(){
+  return {
+    link:function(scope,element,attribute){
+      element.bind('change',function(e){
+        var reader = new FileReader();
 
+        reader.onload = function(e){
+          var img = document.getElementById('uploadImage')
+          img.style.cssText = "width: 100%;height: 100px;";
+          img.setAttribute('src',e.target.result);
+        };
+        reader.readAsDataURL(e.target.files[0])
+      })
+    }
+  }
+})
 
-app.controller('registerController',['$rootScope','$scope','$window','$location',function($rootScope,$scope,$window,$location){
-    $scope.register = function(){
-      
+app.controller('registerController',['$rootScope','$scope','$route','$location','checkCredentials',function($rootScope,$scope,$route,$location,checkCredentials){
+  $scope.showLoader = false;  
+  $scope.register = function(){
+      $scope.showLoader = true;
       if($scope.registerForm.email.$valid && $scope.registerForm.password.$valid && ($scope.register.password==$scope.register.confPassword)){
-          $rootScope.fireObject.auth().createUserWithEmailAndPassword($scope.register.email,$scope.register.password)
-            .then(function(user){
-              var file = document.getElementById('file').files[0];
-              const uid = user.user.uid;
-              var filename = "";
-              if(file)
-              {
-                  filePath = 'user/'+uid+'/'+file.name;
-                  $rootScope.fireObject.storage().ref(filePath).put(file).then(function(){
-                      filename = file.name;
-                  }).catch(function(error){
-                  alert(error.mesaage);
-                });
-              }
-              $rootScope.fireObject.database().ref('users/'+uid).set({
+        checkCredentials.registerUser($scope.register.email,$scope.register.password)
+        .then(function(user){
+              checkCredentials.uploadUserData({
                 username:$scope.register.username,
-                dob: Date($scope.register.dob),
-                filename:file.name
+                dob:Date($scope.register.dob),
+              },user.user.uid).then(function(){
+                window.location.reload();
+              }).catch(function(error){
+                $scope.$apply(function(){
+                  $scope.showLoader="false";
+                });
+                alert(error.message);  
               });
-              alert("You've registered Successfully")
-              $window.location.href="/login";
-            })
-            .catch(function(error){
-              switch(error.code){
-                case "auth/email-already-in-use": alert("Email is already taken");break;
-                case "auth/invalid-email": alert("Email is not Valid");break;
-                case "auth/operation-not-allowed": alert("Account not Enabled");break;
-                case "auth/email-already-in-use": alert("Email is already taken");break;
-                default: alert(error.message);
-              }
-          });
-        }else{
-          alert("Invalid Data");
-        }
-      
+            }).catch(function(error){
+            $scope.$apply(function(){
+              $scope.showLoader="false";
+            });  
+          switch(error.code){
+            case "auth/email-already-in-use": alert("Email is already taken");break;
+            case "auth/invalid-email": alert("Email is not Valid");break;
+            case "auth/operation-not-allowed": alert("Account not Enabled");break;
+            case "auth/email-already-in-use": alert("Email is already taken");break;
+            default: alert(error.message);
+          }
+      });
+      }else{
+        alert("Invalid Data");
+      }  
     }
   }]);
 

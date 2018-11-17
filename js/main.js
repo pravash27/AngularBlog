@@ -34,6 +34,27 @@ app.factory('checkCredentials',function(){
     userSignedIn:function(){
       return firebase.auth().currentUser;
     },
+    uploadUserData:function(userData,uid){
+      return firebase.database().ref("users/"+uid).set(userData);
+    },
+    uploadFile:function(file,uid){
+      var promise = new Promise(function(resolve,reject){
+        if(file){
+          var filePath = "user/"+uid+"/"+file.name;
+          firebase.storage().ref(filePath).put(file).then(function(){
+            resolve(file.name);
+            }).catch(function(error){
+                reject("");
+            });
+        }else{
+          resolve("");
+        }
+      });
+      return promise;
+    },
+    registerUser:function(email,password){
+        return firebase.auth().createUserWithEmailAndPassword(email,password)
+    },
     getUserData:function(uid){
     		var promise = new Promise(function(resolve,reject){
     			firebase.database().ref('/users/'+uid).on('value',function(snapshot){
@@ -94,7 +115,11 @@ app.factory('initContents',['$rootScope','checkCredentials','$location',function
     		setTimeout(function(){
         		if(!checkCredentials.userSignedIn()){
 			        $rootScope.$apply(function() {
-			            $location.path('/login');
+                if($location.path()=='/register'){
+                  $location.path('/register');
+                }else{
+                  $location.path('/login');
+                }
 			        }); 
 			        resolve();
         		}else{
@@ -162,13 +187,15 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
       		if(data){
             $rootScope.isLogin = true; 
       			$scope.$apply(function(){
-      			$rootScope.username = data.userData.username;
-      			checkCredentials.getUserImage(data.uid,data.userData.filename).then(function(url){
-      				$scope.$apply(function(){
-      				$rootScope.imageURL = url;
-      				})
-      			})
-      		})
+            $rootScope.username = data.userData.username;
+            if(data.userData.filename){
+              checkCredentials.getUserImage(data.uid,data.userData.filename).then(function(url){
+                $scope.$apply(function(){
+                $rootScope.imageURL = url;
+                })
+              })
+            }
+      	  })
       		}		
       });
     }

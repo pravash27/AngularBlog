@@ -1,4 +1,7 @@
 <div class="main-form">
+	<div class="submit-loader" ng-show="showLoader">
+		<div class="loader1"></div>
+	</div>
 	<form ng-submit="register()" name="registerForm">
 		<div class="form-title">
 			<h1>Register</h1>
@@ -14,8 +17,9 @@
 			<label for=""></label>
 			<input type="email" name="email" placeholder="Email" ng-model="register.email" id="email" autocomplete="off" required>
 			<span ng-show="!registerForm.email.$pristine && registerForm.email.$invalid">Invalid Email</span>
-			<label for=""></label>
-			<input type="file" name="file" placeholder="File" file-model="register.file" id="file" autocomplete="off">
+			<!--<label for=""></label>
+			<input ng-file-content type="file" name="file" placeholder="File" file-model="register.file" id="file" autocomplete="off">
+			<img id="uploadImage">-->
 			<span ng-show="!registerForm.file.$pristine && registerForm.file.$invalid">Invalid File</span>
 			<label for=""></label>
 			<input type="password" name="password" placeholder="Password" ng-model="register.password" ng-minlength="5" id="password" required>
