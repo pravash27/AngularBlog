@@ -23,11 +23,70 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
     }).when('/forgotpass',{
       templateUrl:'site-pages/forgotpassword.html',
       controller:'forgotpasswordController'
+    }).when('/profile',{
+      templateUrl:'site-pages/profile.html',
+      controller:'forgotpasswordController'
     }).otherwise({
 			redirectTo: '/home'
 		});
 		$locationProvider.html5Mode(true);
 	}]);
+
+app.directive('dropzone',['checkCredentials',function(checkCredentials){
+	return {
+		link:function(scope,element,attribute){
+			var input = document.createElement('input');
+			var img = document.createElement('img');
+			input.setAttribute('type','file');
+			input.style.display = "none";
+			img.style.display='none';
+			input.addEventListener('change',upload)
+			element.append(input);
+			element.append(img);
+			console.dir(element);
+			function upload(e){
+				scope.file
+				if(e.dataTransfer){
+					scope.file = e.dataTransfer.files[0];
+				}else if(e.target){
+					scope.file = e.target.files[0];
+				}
+				if(scope.file){
+					var reader = new FileReader();
+
+					img.style.display = 'block'; 
+        			reader.onload = function(e){
+          				img.style.cssText = "width: 100%;height: 100px;";
+          				img.setAttribute('src',e.target.result);
+        			};
+        			reader.readAsDataURL(scope.file);
+				}
+			}
+			element.bind('click',function(e){
+				input.click();
+			});
+
+			element.bind('dragover',function(e){
+				e.preventDefault();
+				//e.stopPropagation();
+				element[0].classList.add('dragover');
+			});
+
+			element.bind('dragleave',function(e){
+				e.preventDefault();
+				//e.stopPropagation();
+				element[0].classList.remove('dragover');
+			});
+
+			element.bind('drop',function(e){
+				e.preventDefault();
+				//e.stopPropagation();
+				element[0].classList.remove('dragover');
+				upload(e);
+			});
+		}
+	}
+}])
 
 app.factory('checkCredentials',function(){
   return {
@@ -165,10 +224,17 @@ app.factory('initContents',['$rootScope','checkCredentials','$location',function
 
 
 //Main Blog controller
-app.controller('blogController',['$rootScope','$scope','initContents','$cookies','checkCredentials','$location',function($rootScope,$scope,initContents,$cookies,checkCredentials,$location){
+app.controller('blogController',['$rootScope','$scope','initContents','$cookies','checkCredentials','$location','$document','$compile',function($rootScope,$scope,initContents,$cookies,checkCredentials,$location,$document,$compile){
   $rootScope.username = "Anonymous";
   $rootScope.imageURL = "images/img_avatar.png"
   $rootScope.isLogin = false;
+  $rootScope.dismiss = function(){
+  	document.getElementById('model').remove();
+  }
+  $rootScope.update = function(){
+	var body = $document.find('body').eq(0);
+	body.prepend($compile("<div ng-include=\"'site-pages/profile.html'\"></div>")($rootScope));
+  }
   $rootScope.logout = function(){
       firebase.auth().signOut().then(function() {
           sessionStorage.clear();

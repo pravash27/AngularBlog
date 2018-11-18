@@ -130,3 +130,17 @@ div.alert{
 	margin:20px 50px;
 	border-radius: 50px;
 }
+
+div.dropzone{
+	width:auto;
+	height:200px;
+	border: 1px solid black;
+}
+
+div.dragover{
+	border: 1px dashed gray;	
+}
+
+div.dropzone p{
+	margin-top: 80px;
+}
