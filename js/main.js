@@ -32,9 +32,14 @@ app.config(['$routeProvider','$locationProvider',function($routeProvider,$locati
 		$locationProvider.html5Mode(true);
 	}]);
 
-app.directive('dropzone',['checkCredentials',function(checkCredentials){
+app.directive('dropzone',['checkCredentials','$rootScope',function(checkCredentials,$rootScope){
 	return {
-		link:function(scope,element,attribute){
+    scope:{
+      file:"=",
+      dismiss: "&",
+      uploadUserImage:"&"
+    },
+		link:function($scope,element,attribute){
 			var input = document.createElement('input');
 			var img = document.createElement('img');
 			input.setAttribute('type','file');
@@ -43,25 +48,25 @@ app.directive('dropzone',['checkCredentials',function(checkCredentials){
 			input.addEventListener('change',upload)
 			element.append(input);
 			element.append(img);
-			console.dir(element);
 			function upload(e){
-				scope.file
 				if(e.dataTransfer){
-					scope.file = e.dataTransfer.files[0];
+					$scope.file = e.dataTransfer.files[0];
 				}else if(e.target){
-					scope.file = e.target.files[0];
+					$scope.file = e.target.files[0];
 				}
-				if(scope.file){
+				if($scope.file){
 					var reader = new FileReader();
-
+          console.dir($scope.file);
 					img.style.display = 'block'; 
         			reader.onload = function(e){
           				img.style.cssText = "width: 100%;height: 100px;";
           				img.setAttribute('src',e.target.result);
         			};
-        			reader.readAsDataURL(scope.file);
+              reader.readAsDataURL($scope.file);
+              $scope.$parent.file = $scope.file;
 				}
-			}
+      }
+    
 			element.bind('click',function(e){
 				input.click();
 			});
@@ -92,6 +97,9 @@ app.factory('checkCredentials',function(){
   return {
     userSignedIn:function(){
       return firebase.auth().currentUser;
+    },
+    userUpdateData:function(userData,uid){
+      return firebase.database().ref("users/"+uid).update(userData);
     },
     uploadUserData:function(userData,uid){
       return firebase.database().ref("users/"+uid).set(userData);
@@ -219,6 +227,7 @@ app.factory('initContents',['$rootScope','checkCredentials','$location',function
       
 
     }
+   
     return data;
 }]);
 
@@ -228,18 +237,52 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
   $rootScope.username = "Anonymous";
   $rootScope.imageURL = "images/img_avatar.png"
   $rootScope.isLogin = false;
+  $rootScope.file = null;
+
+  
   $rootScope.dismiss = function(){
-  	document.getElementById('model').remove();
+  	document.getElementById('model-div').remove();
   }
+
+  $rootScope.uploadUserImage = function(file){
+    if(file){
+      var uid = firebase.auth().currentUser.uid;
+      console.dir(uid);
+      checkCredentials.uploadFile(file,uid).then(function(filename){
+        checkCredentials.getUserImage(uid,filename).then(function(url){
+          var data = {
+            fileUrl:url
+          }
+          checkCredentials.userUpdateData(data,uid).then(function(){
+            $rootScope.$apply(function(){
+              $rootScope.imageURL = url;
+            })
+          }).catch(function(error){
+            alert(error.message);
+          });
+          alert('Uploaded Successfully')
+        }).catch(function(error){
+          alert(error.message);
+        })
+      })
+    }else{
+      alert("file not found");
+    }
+    
+  }
+ 
   $rootScope.update = function(){
-	var body = $document.find('body').eq(0);
-	body.prepend($compile("<div ng-include=\"'site-pages/profile.html'\"></div>")($rootScope));
+	  var body = $document.find('body').eq(0);
+  	body.prepend($compile("<div id='model-div'file='file' ng-include=\"'site-pages/profile.html'\"></div>")($rootScope));
   }
+ 
   $rootScope.logout = function(){
       firebase.auth().signOut().then(function() {
           sessionStorage.clear();
           sessionStorage.setItem('logout',"Thanks!!!!!!");
           $rootScope.isLogin = false;
+          $rootScope.username = "Anonymous";
+          $rootScope.imageURL = "images/img_avatar.png"
           $rootScope.$apply(function(){
             $location.path('/login');
           })
@@ -247,19 +290,16 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
         
         });
     }
-    $scope.init = function(){
+  
+  $scope.init = function(){
       initContents.checkLoginStatus().then(function(data){
           document.querySelector('.preloader').style.display="none";
       		if(data){
             $rootScope.isLogin = true; 
       			$scope.$apply(function(){
             $rootScope.username = data.userData.username;
-            if(data.userData.filename){
-              checkCredentials.getUserImage(data.uid,data.userData.filename).then(function(url){
-                $scope.$apply(function(){
-                $rootScope.imageURL = url;
-                })
-              })
+            if(data.userData.fileUrl){
+              $rootScope.imageURL = data.userData.fileUrl;
             }
       	  })
       		}		

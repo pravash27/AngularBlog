@@ -61,7 +61,7 @@ form div.form-container{
 }
 
 .dropdown-menu.show {
-    width: fit-content;
+    left:-25px;
     margin: auto -30px;
 }
 

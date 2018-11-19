@@ -26,7 +26,7 @@ app.controller('registerController',['$rootScope','$scope','$route','$location',
         .then(function(user){
               checkCredentials.uploadUserData({
                 username:$scope.register.username,
-                dob:Date($scope.register.dob),
+                dob:Date($scope.register.dob)
               },user.user.uid).then(function(){
                 window.location.reload();
               }).catch(function(error){
