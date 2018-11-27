@@ -144,3 +144,36 @@ div.dragover{
 div.dropzone p{
 	margin-top: 80px;
 }
+
+progress#progress {
+    width: 100%;
+	height: 30px;
+	border-radius: 20px;
+}
+
+div#progressbar {
+    padding: 5px 20px;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+	background: rgba(0, 0, 0, 0.5);
+	
+}
+
+progress[value]::-webkit-progress-bar {
+	background-color: black;
+	border-radius: 20px;
+   }
+progress[value]::-webkit-progress-value {
+	background-color: white;
+	border-radius: 20px;
+   }
+
+div#progressbar h4{
+	color :white;
+	font-weight: bolder;
+	margin: auto 50%;
+}
+div#progress-content {
+    margin-top: 100px;
+}

@@ -247,7 +247,6 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
   $rootScope.uploadUserImage = function(file){
     if(file){
       var uid = firebase.auth().currentUser.uid;
-      console.dir(uid);
       checkCredentials.uploadFile(file,uid).then(function(filename){
         checkCredentials.getUserImage(uid,filename).then(function(url){
           var data = {
