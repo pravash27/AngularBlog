@@ -37,11 +37,13 @@ app.directive('dropzone',['checkCredentials','$rootScope',function(checkCredenti
     scope:{
       file:"=",
       dismiss: "&",
-      uploadUserImage:"&"
+      uploadUserImage:"&",
+      p:'@'
     },
 		link:function($scope,element,attribute){
 			var input = document.createElement('input');
-			var img = document.createElement('img');
+      var img = document.createElement('img');
+      $scope.p = true;
 			input.setAttribute('type','file');
 			input.style.display = "none";
 			img.style.display='none';
@@ -56,11 +58,11 @@ app.directive('dropzone',['checkCredentials','$rootScope',function(checkCredenti
 				}
 				if($scope.file){
 					var reader = new FileReader();
-          console.dir($scope.file);
 					img.style.display = 'block'; 
         			reader.onload = function(e){
-          				img.style.cssText = "width: 100%;height: 100px;";
-          				img.setAttribute('src',e.target.result);
+          				img.style.cssText = "width: 100%;height: inherit;";
+                  img.setAttribute('src',e.target.result);
+                  $scope.p = false
         			};
               reader.readAsDataURL($scope.file);
               $scope.$parent.file = $scope.file;
@@ -93,7 +95,7 @@ app.directive('dropzone',['checkCredentials','$rootScope',function(checkCredenti
 	}
 }])
 
-app.factory('checkCredentials',function(){
+app.factory('checkCredentials',function($rootScope){
   return {
     userSignedIn:function(){
       return firebase.auth().currentUser;
@@ -105,18 +107,31 @@ app.factory('checkCredentials',function(){
       return firebase.database().ref("users/"+uid).set(userData);
     },
     uploadFile:function(file,uid){
+      $rootScope.fileProgress = true;
+      $rootScope.progressPercent = 0;
       var promise = new Promise(function(resolve,reject){
-        if(file){
           var filePath = "user/"+uid+"/"+file.name;
-          firebase.storage().ref(filePath).put(file).then(function(){
+           firebase.storage().ref(filePath).put(file).on('state_changed',function(snapshot){
+            var progress =  (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            $rootScope.$apply(function(){
+              $rootScope.progressPercent = progress;
+            })
+           
+            if(progress==100){
+              setTimeout(function(){
+                $rootScope.$apply(function(){
+                  $rootScope.dismiss();
+                  $rootScope.fileProgress = false;
+                })
+              },1000)
+            }
+          },function(error){
+            alert(error.message)
+          },function(){ 
             resolve(file.name);
-            }).catch(function(error){
-                reject("");
-            });
-        }else{
-          resolve("");
+          });
         }
-      });
+      );
       return promise;
     },
     registerUser:function(email,password){
@@ -128,7 +143,7 @@ app.factory('checkCredentials',function(){
     				var snapshotData = {
     					uid:uid,
     					userData:snapshot.val()
-    				}
+            }
     				resolve(snapshotData);
 	        	},function(error){
 	            console.dir(error);
@@ -238,8 +253,8 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
   $rootScope.imageURL = "images/img_avatar.png"
   $rootScope.isLogin = false;
   $rootScope.file = null;
-
-  
+  $rootScope.fileProgress = false;
+  $rootScope.progressPercent = 0;
   $rootScope.dismiss = function(){
   	document.getElementById('model-div').remove();
   }
@@ -259,7 +274,6 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
           }).catch(function(error){
             alert(error.message);
           });
-          alert('Uploaded Successfully')
         }).catch(function(error){
           alert(error.message);
         })
@@ -288,8 +302,8 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
         }).catch(function(error){
         
         });
-    }
-  
+  }
+
   $scope.init = function(){
       initContents.checkLoginStatus().then(function(data){
           document.querySelector('.preloader').style.display="none";
@@ -303,7 +317,7 @@ app.controller('blogController',['$rootScope','$scope','initContents','$cookies'
       	  })
       		}		
       });
-    }
+  }
  }]);
 
 app.controller('homeController',['$scope','initContents',function($scope,initContents){

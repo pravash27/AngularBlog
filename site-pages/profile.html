@@ -8,15 +8,15 @@
         </button>
       </div>
       <div class="modal-body">
-        <div dropzone class="dropzone"><p>Drop Your Files or Click to Select File</p></div>
+        <div dropzone class="dropzone"><p ng-if="p">Drop Your Files or Click to Select File</p>{{p}}</div>
       </div>
       <div class="modal-footer">
         <button type="button" ng-click="uploadUserImage(file)" class="btn btn-primary">Save changes</button>
         <button ng-click="dismiss()" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
-      <div id="progressbar">
-        <div id="progress-content"><h4>50%</h4>
-        <progress id="progress" value="50" max="100"></progress>
+      <div id="progressbar" ng-if="fileProgress">
+        <div id="progress-content"><h4>{{progressPercent}}%</h4>
+        <progress id="progress" value="{{progressPercent}}" max="100"></progress>
       </div>
         
     </div>
